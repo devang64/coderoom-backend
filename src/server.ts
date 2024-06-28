@@ -5,6 +5,7 @@ import cors from "cors"
 import { SocketEvent, SocketId } from "./types/socket"
 import { USER_CONNECTION_STATUS, User } from "./types/user"
 import { Server } from "socket.io"
+import path from "path"
 
 dotenv.config()
 
@@ -14,7 +15,7 @@ app.use(express.json())
 
 app.use(cors())
 
-
+app.use(express.static(path.join(__dirname, "public")))
 const server = http.createServer(app)
 const io = new Server(server, {
 	cors: {
@@ -256,10 +257,10 @@ io.on("connection", (socket) => {
 	})
 })
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 4000
 
 app.get("/", (req: Request, res: Response) => {
-	res.send("Hello from CodeRoom!")
+	res.sendFile(path.join(__dirname, "..", "public", "index.html"))
 })
 
 server.listen(PORT, () => {
