@@ -2,10 +2,10 @@
 	"name": "coderoom-backend",
 	"version": "1.0.0",
 	"description": "",
-	"main": "dist/server.js",
+	"main": "dist/server.js", 
 	"scripts": {
-	  "dev": "nodemon --exec ts-node src/server.ts",
-	  "start": "node dist/server.js",
+	  "dev": "nodemon --exec ts-node server.ts",
+	  "start": "node dist/server.js", 
 	  "build": "tsc"
 	},
 	"keywords": [],
