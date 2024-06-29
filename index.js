@@ -15,12 +15,13 @@ app.use(express.static(path.join(__dirname, "public")))
 const server = http.createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: "*",
+        origin: "http://localhost:5173",  
+        methods: ["GET", "POST"],
+        allowedHeaders: ["my-custom-header"],
+        credentials: true,
     },
-    maxHttpBufferSize: 1e8,
-    pingTimeout: 60000,
-})
-
+    transports: ["websocket", "polling"],  
+});
 let userSocketMap = []
 
 function getUsersInRoom(roomId) {
