@@ -52,42 +52,51 @@ io.engine.on("connection_error", (err) => {
     console.log(err.code);     // the error code, for example 1
     console.log(err.message);  // the error message, for example "Session ID unknown"
     console.log(err.context);  // some additional error context
-  });
+});
 io.on("connection", (socket) => {
     socket.on(SocketEvent.JOIN_REQUEST, ({ roomId, username }) => {
-        const isUsernameExist = getUsersInRoom(roomId).filter(
-            (u) => u.username === username
-        );
-        if (isUsernameExist.length > 0) {
-            io.to(socket.id).emit(SocketEvent.USERNAME_EXISTS);
-            return;
-        }
+        try {
+            const isUsernameExist = getUsersInRoom(roomId).filter(
+                (u) => u.username === username
+            );
+            if (isUsernameExist.length > 0) {
+                io.to(socket.id).emit(SocketEvent.USERNAME_EXISTS);
+                return;
+            }
 
-        const user = {
-            username,
-            roomId,
-            status: USER_CONNECTION_STATUS.ONLINE,
-            cursorPosition: 0,
-            typing: false,
-            socketId: socket.id,
-            currentFile: null,
-        };
-        userSocketMap.push(user);
-        socket.join(roomId);
-        socket.broadcast.to(roomId).emit(SocketEvent.USER_JOINED, { user });
-        const users = getUsersInRoom(roomId);
-        io.to(socket.id).emit(SocketEvent.JOIN_ACCEPTED, { user, users });
+            const user = {
+                username,
+                roomId,
+                status: USER_CONNECTION_STATUS.ONLINE,
+                cursorPosition: 0,
+                typing: false,
+                socketId: socket.id,
+                currentFile: null,
+            };
+            userSocketMap.push(user);
+            socket.join(roomId);
+            socket.broadcast.to(roomId).emit(SocketEvent.USER_JOINED, { user });
+            const users = getUsersInRoom(roomId);
+            io.to(socket.id).emit(SocketEvent.JOIN_ACCEPTED, { user, users });
+        } catch (error) {
+            console.error(`Error in JOIN_REQUEST: ${error.message}`);
+        }
     });
 
     socket.on("disconnecting", () => {
-        const user = getUserBySocketId(socket.id);
-        if (!user) return;
-        const roomId = user.roomId;
-        socket.broadcast
-            .to(roomId)
-            .emit(SocketEvent.USER_DISCONNECTED, { user });
-        userSocketMap = userSocketMap.filter((u) => u.socketId !== socket.id);
-        socket.leave(roomId);
+        try {
+            const user = getUserBySocketId(socket.id);
+            if (!user) return;
+            const roomId = user.roomId;
+            socket.broadcast
+                .to(roomId)
+                .emit(SocketEvent.USER_DISCONNECTED, { user });
+            userSocketMap = userSocketMap.filter((u) => u.socketId !== socket.id);
+            socket.leave(roomId);
+        } catch (error) {
+            console.log('disconnecting error: ', error);
+
+        }
     });
 
     socket.on(
